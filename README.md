@@ -1,8 +1,6 @@
 Github Activity
 ====
 
-Overview
-
 ## Description
 to search the github commit activity based on the stars from the seeds.
 
