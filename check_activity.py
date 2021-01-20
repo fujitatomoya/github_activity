@@ -1,10 +1,9 @@
-
 from github import Github
 import networkx as nx
 import pygraphml as pg
 
 # Replace this to your own GitHub API key
-TOKEN = ''
+TOKEN = '27049d05cdb285d10fbe37c1229f55c6a49c958b'
 
 ######## static definitions ##########
 # Edge Types (interaction)
@@ -23,7 +22,9 @@ STAR_TH = 100
 
 # Seeds for Graphical Result
 SEEDS = [
-    'ros/ros'
+    'ros2/design',
+    'ros2/rclcpp'
+
 ]
 
 client = Github(TOKEN)
