@@ -3,7 +3,7 @@ import networkx as nx
 import pygraphml as pg
 
 # Replace this to your own GitHub API key
-TOKEN = '27049d05cdb285d10fbe37c1229f55c6a49c958b'
+TOKEN = ''
 
 ######## static definitions ##########
 # Edge Types (interaction)
