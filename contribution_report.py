@@ -52,28 +52,50 @@ def graphql_query(query: str, token: Optional[str] = None):
         raise RuntimeError('Query failed with code {}'.format(request.status_code))
 
 
-def query_contributions(
-    token: str, authors: List[str], orgs: List[str], since: datetime.date
+def query_contribution(
+    token: str, query: str
 ):
-    search_query = ' '.join([
-        'sort:updated-desc',
-        'is:pr is:merged',
-        ' '.join(['author:{}'.format(a) for a in authors]),
-        ' '.join(['org:{}'.format(o) for o in orgs]),
-        'merged:>={}'.format(since.isoformat())
-    ])
-
+    contribution = [] # result based on single query
     cursor = 'null'
     has_next_page = True
-    contributions = []
+
     while has_next_page:
         contribution_query = CONTRIBUTION_QUERY.substitute(
-            search_query=search_query,
+            search_query=query,
             cursor=cursor)
         results = graphql_query(contribution_query, token)['data']
         cursor = results['search']['pageInfo']['endCursor']
         has_next_page = results['search']['pageInfo']['hasNextPage']
-        contributions += results['search']['edges']
+        contribution += results['search']['edges']
+
+    return contribution
+
+
+def query_contributions(
+    token: str, accounts: List[str], orgs: List[str], since: datetime.date
+):
+    contributions = [] # result via all queries
+
+    # is:pr is:merged mentions:fujitatomoya merged:>=2020-12-21
+    search_query = ' '.join([
+        'sort:updated-desc',
+        'is:pr is:merged',
+        ' '.join(['mentions:{}'.format(a) for a in accounts]),
+        ' '.join(['org:{}'.format(o) for o in orgs]),
+        'merged:>={}'.format(since.isoformat())
+    ])
+    contributions += query_contribution(token, search_query)
+
+    # is:pr is:merged author:fujitatomoya merged:>=2020-12-21
+    search_query = ' '.join([
+        'sort:updated-desc',
+        'is:pr is:merged',
+        ' '.join(['author:{}'.format(a) for a in accounts]),
+        ' '.join(['org:{}'.format(o) for o in orgs]),
+        'merged:>={}'.format(since.isoformat())
+    ])
+    contributions += query_contribution(token, search_query)
+
     return contributions
 
 
@@ -90,20 +112,24 @@ def format_contribution(node: dict):
 
 
 def print_report(
-    contributions: List[dict], since: datetime.date, authors: List[str], orgs: List[str]
+    contributions: List[dict], since: datetime.date, accounts: List[str], orgs: List[str]
 ):
     print('# Contributions')
-    print('By Authors: {}'.format(', '.join(authors)))
+    print('By Authors: {}'.format(', '.join(accounts)))
     print('To Repositories in Organizations: {}'.format(', '.join(orgs)))
     print('Merged Since: {}'.format(since.isoformat()))
     print('This report generated: {}'.format(datetime.date.today().isoformat()))
-    print('Contribution count (remember to update if you remove things): {}'.format(
-        len(contributions)))
     byrepo = {}
     for c in contributions:
         node = c['node']
         repo = node['repository']['nameWithOwner']
-        byrepo.setdefault(repo, []).append(format_contribution(node))
+        if byrepo.get(repo) is None:
+            byrepo.setdefault(repo, []).append(format_contribution(node))
+        elif (format_contribution(node) not in byrepo.get(repo)):
+            # get rid of redundant string.
+            byrepo.setdefault(repo, []).append(format_contribution(node))
+        else:
+            pass
 
     for repo, contribs in sorted(byrepo.items()):
         print('* {}'.format(repo))
@@ -128,7 +154,7 @@ def main(args=None):
         required=True,
         help='Github access token to access github.com')
     parser.add_argument(
-        '-a', '--authors',
+        '-a', '--accounts',
         nargs='+',
         required=True,
         help='Report contributions for these github usernames')
@@ -143,8 +169,8 @@ def main(args=None):
         parsed = parser.parse_args(args)
 
     contributions = query_contributions(
-        parsed.token, parsed.authors, parsed.orgs, parsed.since)
-    print_report(contributions, parsed.since, parsed.authors, parsed.orgs)
+        parsed.token, parsed.accounts, parsed.orgs, parsed.since)
+    print_report(contributions, parsed.since, parsed.accounts, parsed.orgs)
 
 
 if __name__ == '__main__':

@@ -1,5 +1,4 @@
-Github Activity Tools
-====
+# Github Activity Tools
 
 ## Overview
 
@@ -40,10 +39,10 @@ $ pip install PyGithub networkx pygraphml
 #### Usage
 
 ```
->python3 contribution_report.py -t 27049d05cdb285d10fbe37c1229f55c6a49c958b -a fujitatomoya Barry-Xu-2018 iuhilnehc-ynos -o ros ros2
+>python3 contribution_report.py -t <YOUR_GITHUB_TOKEN> -a <ACCOUNTS> -o <ORGANIZATION>
 # Contributions
 By Authors: fujitatomoya, Barry-Xu-2018, iuhilnehc-ynos
-To Repositories in Organizations: ros, ros2
+To Repositories in Organizations: ros2
 Merged Since: 2020-12-21
 This report generated: 2021-01-20
 Contribution count (remember to update if you remove things): 6
