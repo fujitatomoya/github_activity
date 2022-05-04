@@ -1,12 +1,24 @@
 import argparse
 import datetime
 import requests
+import string
 
 from string import Template
 from typing import (
     List,
     Optional,
 )
+
+
+class BlankFormatter(string.Formatter):
+    def __init__(self, default=''):
+        self.default=default
+
+    def get_value(self, key, args, kwds):
+        if isinstance(key, str):
+            return kwds.get(key, self.default)
+        else:
+            return string.Formatter.get_value(key, args, kwds)
 
 
 CONTRIBUTION_QUERY = Template("""
@@ -104,9 +116,14 @@ def format_github_time_to_date(value):
 
 
 def format_contribution(node: dict):
+    # author:name could be null, that leads KeyError
+    if len(node['author']) != 0:
+        author_name = node['author']['name']
+    else:
+        author_name = 'Not registered'
     return '"{}" | {} | {} (merged {})'.format(
         node['title'],
-        node['author']['name'],
+        author_name,
         node['permalink'],
         format_github_time_to_date(node['mergedAt']))
 
