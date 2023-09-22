@@ -75,7 +75,10 @@ def query_contribution(
         contribution_query = CONTRIBUTION_QUERY.substitute(
             search_query=query,
             cursor=cursor)
-        results = graphql_query(contribution_query, token)['data']
+        try:
+            results = graphql_query(contribution_query, token)['data']
+        except Exception as error:
+            print("Failed to call graphql_query:", type(error).__name__, error)
         cursor = results['search']['pageInfo']['endCursor']
         has_next_page = results['search']['pageInfo']['hasNextPage']
         contribution += results['search']['edges']
