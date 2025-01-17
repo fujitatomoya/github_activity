@@ -9,6 +9,8 @@ tools and scripts to search the github commit activity based on conditions such 
   - see output example [github_activity.graphml](./github_activity.graphml)
 - [contribution_report](./contribution_report.py)
   - generate contribution report based on date, user, and organization.
+- [clone_all_repositories](./clone_all_repositories.py)
+  - Clone all repositories from specific organization once.
 
 ### [check_activity.py](./check_activity.py)
 
@@ -56,6 +58,18 @@ Contribution count (remember to update if you remove things): 6
   * "Fixed playing if unknown message types exist" | Chen Lihui | https://github.com/ros2/rosbag2/pull/592 (merged 2020-12-29)
 * ros2/system_tests
   * "update parameter client test with timeout." | tomoya | https://github.com/ros2/system_tests/pull/457 (merged 2020-12-22)
+```
+
+### [clone_all_repositories.py](./clone_all_repositories.py)
+
+#### Requirement
+
+- Python version 3
+
+#### Usage
+
+```
+>python3 clone_all_repositories.py ros2 --token <YOUR_GITHUB_TOKEN>
 ```
 
 ## Author
