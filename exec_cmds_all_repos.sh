@@ -10,10 +10,37 @@ function exit_trap() {
 }
 
 # This function is defined by user requirement, what needs to be done in each repo.
-function user_operation () {
+function user_operation_base () {
     trap exit_trap ERR
     echo "[${FUNCNAME[0]}]: Executing user defined operation."
-    git status
+    if [ -f ".github/ISSUE_TEMPLATE.md" ]; then
+        echo "Found .github/ISSUE_TEMPLATE.md. Removing it..."
+        rm .github/ISSUE_TEMPLATE.md
+
+        echo "Creating new branch 'remove-old-issue-template'..."
+        git checkout -b remove-old-issue-template
+
+        echo "Adding changes and committing..."
+        git add .github/ISSUE_TEMPLATE.md
+        git commit -m "remove .github/ISSUE_TEMPLATE.md (old version of templates)"
+
+        echo "Pushing branch to origin..."
+        git push -u origin remove-old-issue-template
+    else
+        echo ".github/ISSUE_TEMPLATE.md not found. Skipping."
+    fi
+}
+
+# This function is defined by user requirement, what needs to be done in each repo.
+function user_operation_adjust () {
+    trap exit_trap ERR
+    echo "[${FUNCNAME[0]}]: Executing user defined operation."
+    echo "Checkout development branch 'remove-old-issue-template'..."
+    git checkout -b remove-old-issue-template origin/remove-old-issue-template
+    echo "Adding signoff changes and committing..."
+    git commit --signoff --amend -m "remove .github/ISSUE_TEMPLATE.md (old version of templates)"
+    echo "Pushing branch to origin..."
+    git push --force-with-lease origin remove-old-issue-template
 }
 
 if [ "$#" -ne 1 ]; then
@@ -55,7 +82,8 @@ for dir in */; do
     if [ -d "$dir/.git" ]; then
         echo "Checking status of $dir"
         cd "$dir" || continue
-        user_operation
+        #user_operation_base
+        user_operation_adjust
         cd ..
     fi
 done
